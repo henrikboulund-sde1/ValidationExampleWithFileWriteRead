@@ -1,13 +1,14 @@
 package dk.easv.exercise431solution;
 
+import be.ValidationObj;
+import bll.FileDataLogic;
 import bll.ValidationLogic;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.paint.Color;
+
+import java.util.List;
 
 public class HelloController {
     @FXML
@@ -19,8 +20,28 @@ public class HelloController {
     @FXML
     private Label lblValidationText;
 
-    private ValidationLogic validationLogic = new ValidationLogic();
+    @FXML
+    private ListView lstHistory;
 
+    private ValidationLogic validationLogic = new ValidationLogic();
+    private FileDataLogic fileDataLogic = new FileDataLogic();
+
+    @FXML
+    protected void initialize()
+    {
+        refreshView();
+    }
+
+    private void refreshView()
+    {
+        lstHistory.getItems().clear();
+        List<ValidationObj> historyList = fileDataLogic.loadData();
+        for(int i = 0; i<=historyList.size()-1; i=i+1)
+        {
+            ValidationObj obj = (ValidationObj) historyList.toArray()[i];
+            lstHistory.getItems().add(obj.getName() + ", " + obj.getAge());
+        }
+    }
 
     private void showMessageBox(Alert.AlertType alertType, String title, String headerText, String messageText)
     {
@@ -58,6 +79,11 @@ public class HelloController {
                 lblValidationText.setText(String.format("Hello %s, your age is %s and is not valid", txtName.getText(), age));
                 lblValidationText.setTextFill(Color.DARKRED);
             }
+
+            ValidationObj obj = new ValidationObj(txtName.getText(), age);
+            fileDataLogic.writeToFile(obj);
+
+            refreshView();
         }
     }
 
